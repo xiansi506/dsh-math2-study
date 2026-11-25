@@ -15,12 +15,12 @@ const skills = new Map([
 
 const operations = {
   initialize: '{}',
-  save_question: '{statement, chapter, title?, sourceType?, source?, pending?, internalSolution?}',
-  record_attempt: '{questionId 或 question, sourceKey, answer, result, hints?, diagnostic?, confirmedCause?, seconds?}',
-  correct_attempt: '{attemptId, reason, result?, diagnostic?, confirmedCause?}',
+  save_question: '{statement, chapter, title?, sourceType?, source?, sourceNumber?, pending?, internalSolution?}',
+  record_attempt: '{questionId 或 question, sourceKey, answer, result, hints?, diagnostic?, confirmedCause?, seconds?, occurredAt?}',
+  correct_attempt: '{attemptId, reason, result?, diagnostic?, confirmedCause?, occurredAt?}',
   set_coverage: '{chapter, coverage, evidence}',
   set_mastery: '{chapter, target: 知识点/方法/公式名称, level, evidence: [A-ID], note}',
-  schedule_review: '{questionId, due, minutes, priority?, title?, reviewId?}',
+  schedule_review: '{questionId, assignedQuestionId?, due, minutes, priority?, title?, reviewId?}',
   complete_review: '{reviewId, attemptId}',
   save_hint: '{questionId, level}',
   reveal_solution: '{questionId}',
@@ -49,8 +49,8 @@ export function apply(ctx) {
       id: str('题目、作答、复习或笔记 ID'),
       chapter: str('按章节筛选，例如 GS01'),
       sourceKey: str('按稳定来源键找回原作答和事务'),
-      search: str('按关键词搜索题面、标题、Q-ID 或来源'),
-      reviewStatus: { ...str('复习任务列表和下一页偏移量'), enum: ['due', 'pending', 'completed'] },
+      search: str('按关键词搜索题面、标题、Q-ID、来源或题号'),
+      reviewStatus: { ...str('复习任务列表和下一页偏移量'), enum: ['due', 'pending', 'needs_review', 'completed'] },
       offset: { type: 'integer', description: '列表下一页偏移量，默认 0' },
       today: str('查询到期复习时可传截止日期 YYYY-MM-DD，默认为用户时区的今天'),
       operations: { type: 'boolean', description: '返回写入操作的参数及可选值' },
@@ -71,6 +71,12 @@ export function apply(ctx) {
         coverage: ['unknown', 'not_started', 'learning', 'learned'],
         sourceType: ['textbook', 'exam', 'generated', 'other'],
         noteKind: ['knowledge', 'method', 'formula', 'relation', 'teaching', 'plan'],
+        fieldGuide: {
+          sourceNumber: '来源中的题号或小题号（字符串）。只在已核验时填写。',
+          occurredAt: '实际作答时间。刚完成可省略。补录用带时区的 ISO 时间或 YYYY-MM-DD；过去日期未知时传 null。更正作答时省略则保留原日期。',
+          assignedQuestionId: '复习实际要做的题目编号。安排变式时 questionId 仍为原题，assignedQuestionId 为已保存的变式 Q-ID。',
+          complete_review: '使用本任务指定题目在排期后完成的已核验 A-ID。同日补录需确认实际时刻。同一次作答只能用于一个复习任务。',
+        },
       };
       if (input.id !== undefined && (typeof input.id !== 'string' || input.id.length > 80)) throw new Error('记录 ID 无效');
       return store.read(input);

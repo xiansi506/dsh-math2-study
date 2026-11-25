@@ -1,10 +1,10 @@
 {
   "name": "dsh-math2-study",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "description": "Math II tutor and learning dashboard for DeepSeek Harness.",
-  "engines": { "node": ">=24", "dsh": "^0.2.2-rc.5" },
+  "engines": { "node": ">=24", "dsh": "^0.2.2-rc.5 || 0.2.3-alpha.2" },
   "exports": {
     ".": "./index.mjs",
     "./package.json": "./package.json",
